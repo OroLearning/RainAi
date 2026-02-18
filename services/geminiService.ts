@@ -39,7 +39,7 @@ export const generateStorySequence = async (
   directorMode: boolean = false,
   previousResult?: LaunchSequence
 ): Promise<LaunchSequence> => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_API_KEY });
   
   const contents: any[] = [{ text: prompt }];
   
