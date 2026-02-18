@@ -1,3 +1,8 @@
+/**
+ * MAIN APP COMPONENT
+ * Manages global state including routing (view), user authentication, and theme.
+ */
+
 import React, { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import VisualMockup from './components/VisualMockup';
@@ -9,21 +14,26 @@ import AuthModal from './components/AuthModal';
 import { LaunchSequence } from './types';
 
 const App: React.FC = () => {
-  const [productInfo, setProductInfo] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [view, setView] = useState<'landing' | 'dashboard'>('landing');
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [openSettingsOnDash, setOpenSettingsOnDash] = useState(false);
+  // Global Application State
+  const [productInfo, setProductInfo] = useState('');     // User's input prompt from hero section
+  const [loading, setLoading] = useState(false);          // Global loading state (unused in landing but kept for consistency)
+  const [error, setError] = useState<string | null>(null); // Global error message
+  const [view, setView] = useState<'landing' | 'dashboard'>('landing'); // Simple routing state
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);        // Modal visibility
+  const [openSettingsOnDash, setOpenSettingsOnDash] = useState(false);  // Control to deep-link to settings in dashboard
+  
+  // User Session Management
   const [user, setUser] = useState<{ email: string; name: string } | null>(() => {
     const saved = localStorage.getItem('rain_logged_user');
     return saved ? JSON.parse(saved) : null;
   });
 
+  // Dark Mode Persistence Logic
   const [darkMode, setDarkMode] = useState(() => {
     return localStorage.getItem('rain_theme') === 'dark' || document.documentElement.classList.contains('dark');
   });
 
+  // Effect to apply theme classes to document root
   useEffect(() => {
     if (darkMode) {
       document.documentElement.classList.add('dark');
@@ -36,6 +46,7 @@ const App: React.FC = () => {
     }
   }, [darkMode]);
 
+  // Effect to trigger landing page animations on scroll
   useEffect(() => {
     if (view === 'landing') {
       const observer = new IntersectionObserver((entries) => {
@@ -46,6 +57,7 @@ const App: React.FC = () => {
     }
   }, [view]);
 
+  // Navigation Handlers
   const handleLaunchDashboard = () => {
     setOpenSettingsOnDash(false);
     if (!user) {
@@ -64,6 +76,7 @@ const App: React.FC = () => {
     }
   };
 
+  // Auth Callbacks
   const handleAuthSuccess = (userData: { email: string; name: string }) => {
     setUser(userData);
     localStorage.setItem('rain_logged_user', JSON.stringify(userData));
@@ -78,13 +91,13 @@ const App: React.FC = () => {
     setView('landing');
   };
 
+  // Profile Update Handler
   const handleUpdateUser = (newName: string) => {
     if (user) {
       const updatedUser = { ...user, name: newName };
       setUser(updatedUser);
       localStorage.setItem('rain_logged_user', JSON.stringify(updatedUser));
       
-      // Also update in the global users storage
       const users = JSON.parse(localStorage.getItem('rain_users') || '{}');
       const normalizedEmail = user.email.toLowerCase();
       if (users[normalizedEmail]) {
@@ -94,6 +107,7 @@ const App: React.FC = () => {
     }
   };
 
+  // Conditional Rendering for Authenticated Dashboard
   if (view === 'dashboard' && user) return (
     <DashboardView 
       onBack={() => setView('landing')} 
@@ -108,6 +122,7 @@ const App: React.FC = () => {
     />
   );
 
+  // Landing Page Render
   return (
     <div className="min-h-screen hero-bg dark:bg-darkBg dark:text-slate-100 transition-colors duration-300">
       <Navbar onActionClick={handleLaunchDashboard} onSettingsClick={handleSettingsClick} />

@@ -1,8 +1,17 @@
+/**
+ * WHAT WE DO SECTION
+ * High-level overview of the application's core capabilities.
+ */
+
 import React, { useEffect, useRef } from 'react';
 
+/**
+ * Reusable Feature Entry Card
+ */
 const FeatureCard = ({ title, description, icon: Icon, isDark = false }: any) => {
   const cardRef = useRef<HTMLDivElement>(null);
 
+  // Trigger intersection animations
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -38,6 +47,7 @@ const WhatWeDo: React.FC = () => {
   return (
     <section className="py-32 px-4 max-w-7xl mx-auto">
       <div className="grid lg:grid-cols-2 gap-20 items-center">
+        {/* Copywriting Section */}
         <div className="reveal">
           <div className="flex items-center gap-2 mb-6">
             <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
@@ -52,6 +62,7 @@ const WhatWeDo: React.FC = () => {
           </p>
         </div>
 
+        {/* Dynamic 2x2 Grid of Feature Cards */}
         <div className="grid grid-cols-2 gap-6">
           <FeatureCard 
             title="Drafts viral story hooks"

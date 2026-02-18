@@ -1,3 +1,9 @@
+/**
+ * DASHBOARD VIEW
+ * The core workspace for authenticated users. Handles sequence generation,
+ * archive history, and system settings.
+ */
+
 import React, { useState, useEffect, useRef } from 'react';
 import { generateStorySequence } from '../services/geminiService';
 import { LaunchSequence, StoryDay } from '../types';
@@ -22,6 +28,9 @@ interface DashboardProps {
   openSettingsInitially?: boolean;
 }
 
+/**
+ * Helper to explain technical cinematic terms in tooltips.
+ */
 const getShotExplanation = (shot: string): string => {
   const s = shot.toLowerCase();
   if (s.includes('pan')) return "Perform a smooth horizontal rotation to reveal context and environment around the subject.";
@@ -45,34 +54,35 @@ export default function DashboardView({
   initialPrompt = '', 
   openSettingsInitially = false 
 }: DashboardProps) {
+  // Navigation & UI State
   const [activeTab, setActiveTab] = useState<'workspace' | 'history'>('workspace');
   const [showSettings, setShowSettings] = useState(false);
   const [settingsView, setSettingsView] = useState<SettingsView>('main');
   
-  // Storage key for history
+  // Storage key uniquely identified by user email
   const historyStorageKey = `rain_history_${userEmail.toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
 
-  // Track if we should return to landing page upon closing settings
   const [shouldReturnToLanding, setShouldReturnToLanding] = useState(openSettingsInitially);
 
-  // Profile settings
+  // Profile Edit State
   const [newName, setNewName] = useState(userName);
   const [currentPass, setCurrentPass] = useState('');
   const [newPass, setNewPass] = useState('');
   const [profileMsg, setProfileMsg] = useState({ text: '', type: '' });
 
-  // Report Issue state
+  // Reporting System State
   const [reportText, setReportText] = useState('');
   const [reportFiles, setReportFiles] = useState<File[]>([]);
   const [reportStatus, setReportStatus] = useState('');
 
-  const [prompt, setPrompt] = useState(initialPrompt);
-  const [loading, setLoading] = useState(false);
-  const [loadingSource, setLoadingSource] = useState<'update' | 'new' | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<LaunchSequence | null>(null);
+  // Generation Core State
+  const [prompt, setPrompt] = useState(initialPrompt);               // The product description
+  const [loading, setLoading] = useState(false);                     // Is the AI thinking?
+  const [loadingSource, setLoadingSource] = useState<'update' | 'new' | null>(null); // Context of the load
+  const [error, setError] = useState<string | null>(null);           // Error handling
+  const [result, setResult] = useState<LaunchSequence | null>(null); // The current active sequence
   
-  // Load persistent history from localStorage
+  // History persistence: Load from localStorage on initialization
   const [history, setHistory] = useState<HistoryItem[]>(() => {
     try {
       const saved = localStorage.getItem(`rain_history_${userEmail.toLowerCase().replace(/[^a-z0-9]/g, '_')}`);
@@ -82,15 +92,16 @@ export default function DashboardView({
     }
   });
 
-  const [isDirectorMode, setIsDirectorMode] = useState(false);
+  const [isDirectorMode, setIsDirectorMode] = useState(false); // Toggle for technical shot lists
   
-  // Sidebar states
+  // Dynamic Sidebar State
   const [isSidebarPinned, setIsSidebarPinned] = useState(false);
   const [isSidebarHovered, setIsSidebarHovered] = useState(false);
   const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
+  // Synchronize initial component state with props
   useEffect(() => {
     if (openSettingsInitially) {
       setShowSettings(true);
@@ -103,6 +114,7 @@ export default function DashboardView({
     setNewName(userName);
   }, [userName]);
 
+  // UI State Handlers
   const handleCloseSettings = () => {
     if (settingsView !== 'main') {
       setSettingsView('main');
@@ -120,6 +132,9 @@ export default function DashboardView({
     setShouldReturnToLanding(false);
   };
 
+  /**
+   * Helper to determine color schemes for the 4 phases of the launch.
+   */
   const getStageStyles = (day: number) => {
     if (day <= 3) return { label: 'A W A R E N E S S', textColor: 'text-cyan-500', borderColor: 'border-cyan-500', tint: 'bg-cyan-400/5', hoverTint: 'group-hover:bg-cyan-400/10', border: 'border-cyan-100/30' };
     if (day <= 7) return { label: 'A U T H O R I T Y', textColor: 'text-orange-500', borderColor: 'border-orange-500', tint: 'bg-orange-400/5', hoverTint: 'group-hover:bg-orange-400/10', border: 'border-orange-100/30' };
@@ -127,6 +142,10 @@ export default function DashboardView({
     return { label: 'C O N V E R S I O N', textColor: 'text-lime-500', borderColor: 'border-lime-500', tint: 'bg-lime-400/5', hoverTint: 'group-hover:bg-lime-400/10', border: 'border-lime-100/30' };
   };
 
+  /**
+   * Triggers the AI synthesis process.
+   * @param isUpdate If true, sends previous context to the AI for refinement.
+   */
   const handleGenerate = async (isUpdate: boolean = true) => {
     if (!prompt.trim()) return;
     setLoading(true);
@@ -145,6 +164,7 @@ export default function DashboardView({
         isDirectorMode: currentMode 
       };
 
+      // Persistent Storage Logic
       setHistory(prev => {
         const updated = [newItem, ...prev];
         localStorage.setItem(historyStorageKey, JSON.stringify(updated));
@@ -162,6 +182,9 @@ export default function DashboardView({
     }
   };
 
+  /**
+   * Updates user name or password in the global neural vault (localStorage).
+   */
   const handleProfileUpdate = (e: React.FormEvent) => {
     e.preventDefault();
     setProfileMsg({ text: '', type: '' });
@@ -204,6 +227,9 @@ export default function DashboardView({
     }
   };
 
+  /**
+   * Simulates a signal report transmission.
+   */
   const handleSendReport = () => {
     if (!reportText.trim()) return;
     setReportStatus('Transmitting signal...');
@@ -215,6 +241,7 @@ export default function DashboardView({
     }, 1500);
   };
 
+  // Sidebar Interaction Logic
   const handleSidebarEnter = () => {
     if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
     setIsSidebarHovered(true);
@@ -232,9 +259,10 @@ export default function DashboardView({
   return (
     <div className={`w-screen h-screen flex font-sans bg-[#fcfdfe] dark:bg-darkBg text-slate-900 dark:text-slate-100 overflow-hidden transition-colors duration-0`}>
       
+      {/* Invisible Hover Trigger Area */}
       <div className="fixed top-0 left-0 w-4 h-full z-[100]" onMouseEnter={handleSidebarEnter} />
 
-      {/* Sidebar */}
+      {/* Sidebar Component */}
       <aside 
         onMouseEnter={handleSidebarEnter}
         onMouseLeave={handleSidebarLeave}
@@ -279,7 +307,7 @@ export default function DashboardView({
         </div>
       </aside>
 
-      {/* Settings Modal */}
+      {/* Settings Overlay View */}
       {showSettings && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-slate-900/20 dark:bg-black/60 backdrop-blur-md animate-fade-in" onClick={handleCloseSettings}>
           <div className="w-full max-w-2xl bg-white dark:bg-darkCard rounded-[48px] p-12 shadow-heavy border border-slate-100 dark:border-darkBorder animate-fade-in-up" onClick={(e) => e.stopPropagation()}>
@@ -293,6 +321,7 @@ export default function DashboardView({
             </div>
             
             <div className="space-y-6">
+               {/* Main Settings Menu */}
                {settingsView === 'main' && (
                  <>
                    <div className="bg-slate-50 dark:bg-slate-900/50 p-8 rounded-[36px] border border-slate-100 dark:border-darkBorder flex items-center justify-between">
@@ -332,6 +361,7 @@ export default function DashboardView({
                  </>
                )}
 
+               {/* Profile Identity Sub-view */}
                {settingsView === 'profile' && (
                  <div className="animate-fade-in-up">
                    <div className="flex items-center gap-6 mb-10 bg-slate-50 dark:bg-slate-900/50 p-6 rounded-[32px] border border-slate-100 dark:border-darkBorder">
@@ -368,6 +398,7 @@ export default function DashboardView({
                  </div>
                )}
 
+               {/* Issue Reporting Sub-view */}
                {settingsView === 'report' && (
                  <div className="animate-fade-in-up space-y-6">
                     <p className="text-sm font-bold text-slate-400 leading-relaxed italic">Experiencing static in the engine? Describe your obstacle and attach evidence if available.</p>
@@ -397,7 +428,7 @@ export default function DashboardView({
         </div>
       )}
 
-      {/* Main Content Area */}
+      {/* Primary Workspace Scroll Area */}
       <main 
         ref={scrollContainerRef} 
         className={`flex-1 flex flex-col overflow-y-auto relative custom-scrollbar transition-all duration-500 bg-[#fcfdfe] dark:bg-darkBg ${isSidebarPinned ? 'ml-80' : 'ml-0'}`}
@@ -405,6 +436,8 @@ export default function DashboardView({
         <div className="p-6 md:p-12 flex flex-col gap-10 h-full relative z-10">
           {activeTab === 'workspace' && (
             <div className={`flex flex-col items-center flex-1 w-full max-w-7xl mx-auto ${result ? 'pt-4' : 'justify-center'}`}>
+              
+              {/* Empty Workspace: Generator Prompt */}
               {!result ? (
                  <div className="w-full max-w-4xl text-center">
                     <h1 className="text-5xl md:text-7xl font-black uppercase mb-12 tracking-tight dark:text-white">Strategy Synthesis</h1>
@@ -475,6 +508,7 @@ export default function DashboardView({
                     </div>
                  </div>
               ) : (
+                /* Full Workspace: Render Results */
                 <div className="w-full pb-20 animate-fade-in flex flex-col">
                   <div className="text-center mb-24 px-4">
                     <h3 className="text-5xl md:text-7xl font-black uppercase mb-6 tracking-tight leading-none dark:text-white">{result.productName}</h3>
@@ -499,6 +533,7 @@ export default function DashboardView({
                                <p className={`text-[9px] font-black ${stage.textColor} opacity-60 uppercase tracking-widest mb-4`}>Strategic CTA</p>
                                <span className={`${stage.textColor} font-black text-lg md:text-xl tracking-tight leading-tight text-center px-4`}>{item.cta}</span>
                               </div>
+                              {/* Director Mode Shot List */}
                               {item.shotList && item.shotList.length > 0 && (
                                 <div className="w-full p-6 bg-slate-50/50 dark:bg-slate-900/50 rounded-[32px] border border-slate-100 dark:border-darkBorder mt-6">
                                    <p className={`text-[10px] font-black ${stage.textColor} uppercase tracking-[0.2em] mb-4 text-center`}>Director Directive</p>
@@ -517,6 +552,7 @@ export default function DashboardView({
                               )}
                             </div>
                           </div>
+                          {/* Visual separator with tooltip */}
                           {!isLast && (
                             <div className="absolute -bottom-20 left-1/2 -translate-x-1/2 flex flex-col items-center z-30">
                               <div className="w-0.5 h-20 border-l-2 border-dotted border-slate-200 dark:border-slate-800"></div>
@@ -536,7 +572,7 @@ export default function DashboardView({
                     })}
                   </div>
 
-                  {/* Reprompt area at the bottom */}
+                  {/* Secondary Refinement Area (Reprompt) */}
                   <div className="w-full max-w-4xl mx-auto mb-12">
                     <div className="text-center mb-8">
                       <h4 className="text-3xl font-black uppercase tracking-tight dark:text-white">Refine Strategy</h4>
@@ -657,6 +693,7 @@ export default function DashboardView({
               )}
             </div>
           )}
+          {/* History Tab: List of Saved Protocols */}
           {activeTab === 'history' && (
             <div className="max-w-7xl mx-auto w-full px-4 md:px-12 pb-20">
                <div className="flex items-center justify-between mb-12">
@@ -673,12 +710,15 @@ export default function DashboardView({
                       <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{item.result.audience}</p>
                    </div>
                    <div className="flex items-center gap-4 w-full md:w-auto">
+                    {/* Mode badge status */}
                     <div className={`px-3 py-2 rounded-full text-[8px] font-black uppercase tracking-[0.2em] border shadow-sm ${item.isDirectorMode ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 border-indigo-100 dark:border-indigo-800' : 'bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-100 dark:border-darkBorder text-slate-700'}`}>
                       {item.isDirectorMode ? 'Director Mode' : 'Standard Mode'}
                     </div>
                     
+                    {/* Load historical data back into active workspace */}
                     <button onClick={() => { setResult(item.result); setIsDirectorMode(item.isDirectorMode); setActiveTab('workspace'); }} className="flex-1 md:flex-none px-10 py-4 bg-slate-900 dark:bg-blue-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 shadow-xl transition-all">Recall Strategy</button>
 
+                    {/* Permanent deletion from local storage */}
                     <button 
                       onClick={() => {
                         setHistory(prev => {

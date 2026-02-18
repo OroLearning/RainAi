@@ -1,16 +1,25 @@
+/**
+ * PROCESS STEPS SECTION
+ * Describes the actual 4-phase psychological journey of the 14-day protocol.
+ */
+
 import React from 'react';
 
+/**
+ * Reusable Column for the Process Roadmap
+ */
 const StepColumn = ({ number, title, description, colorClass, numberColor, icon: Icon }: any) => {
   return (
     <div className={`flex-1 min-h-[600px] p-12 flex flex-col border-r border-slate-100 dark:border-darkBorder last:border-0 transition-all duration-700 ease-out group hover:bg-white dark:hover:bg-darkCard hover:z-10 hover:shadow-[0_40px_100px_-20px_rgba(59,130,246,0.15)] hover:scale-[1.02] cursor-default ${colorClass}`}>
-      {/* Top Section: Number with Fixed Height for Alignment */}
+      
+      {/* Visual Indicator: Background Number */}
       <div className="h-32 flex items-end mb-8">
         <div className={`text-[120px] font-black opacity-10 dark:opacity-20 select-none tracking-tighter transition-all duration-700 group-hover:opacity-40 dark:group-hover:opacity-40 group-hover:translate-x-4 group-hover:scale-110 ${numberColor}`}>
           {number}
         </div>
       </div>
       
-      {/* Icon Section with Fixed Height for Alignment */}
+      {/* Iconography with Dynamic Color Schemes */}
       <div className="h-24 flex items-center mb-16 transition-transform duration-500 group-hover:translate-y-[-8px]">
         <div className="flex items-center gap-3">
           <div className={`p-4 rounded-[24px] ${numberColor.replace('text', 'bg').replace('500', '50')} dark:bg-slate-800 border-2 ${numberColor.replace('text', 'border').replace('500', '100')} dark:border-darkBorder shadow-sm group-hover:shadow-md transition-all duration-500`}>
@@ -23,7 +32,7 @@ const StepColumn = ({ number, title, description, colorClass, numberColor, icon:
         </div>
       </div>
 
-      {/* Content Section: Title & Description */}
+      {/* Narrative Copy Section */}
       <div className="transition-all duration-500 group-hover:translate-y-[-4px]">
         <div className="min-h-[5rem] flex items-start mb-6">
           <h3 className="text-2xl font-black uppercase tracking-tight leading-tight text-slate-900 dark:text-white group-hover:text-blue-600 transition-all duration-500">
@@ -49,6 +58,7 @@ const ProcessSteps: React.FC = () => {
         <p className="text-slate-500 dark:text-slate-500 mt-4 max-w-xl text-lg font-medium italic opacity-70">From initial intrigue to final close—we've mapped out the exact psychological journey of your future customers.</p>
       </div>
 
+      {/* 4-Step Roadmap Visualization */}
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row bg-slate-50/50 dark:bg-darkCard rounded-[48px] border border-slate-100 dark:border-darkBorder overflow-hidden shadow-2xl shadow-blue-500/5 transition-all duration-1000 items-stretch">
         <StepColumn 
           number="1"

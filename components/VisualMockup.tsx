@@ -1,9 +1,19 @@
+/**
+ * VISUAL MOCKUP COMPONENT
+ * The interactive centerpiece of the landing page. Simulates the actual AI 
+ * generation interface to provide user feedback before login.
+ */
+
 import React, { useState } from 'react';
 
+/**
+ * Procedural Background Pattern
+ * Generates an array of words and icons floating in the background of the card
+ * to emphasize the "strategy synthesis" brand theme.
+ */
 const BackgroundElements = () => {
-  // Creating a very dense set of elements to fill the space as requested
   const elements = [
-    // Words
+    // Branded keywords floating in 3D space
     { type: 'word', content: 'SCALE', top: '5%', left: '10%', rotate: '-15deg' },
     { type: 'word', content: 'REVENUE', top: '20%', left: '80%', rotate: '10deg' },
     { type: 'word', content: 'HOOK', top: '70%', left: '5%', rotate: '-8deg' },
@@ -20,61 +30,20 @@ const BackgroundElements = () => {
     { type: 'word', content: 'VISION', top: '92%', left: '55%', rotate: '-5deg' },
     { type: 'word', content: 'CASH', top: '58%', left: '15%', rotate: '20deg' },
 
-    // Icons - Brains
+    // Thematic iconography
     { type: 'icon', icon: 'brain', top: '10%', left: '50%', size: 'w-5 h-5' },
-    { type: 'icon', icon: 'brain', top: '80%', left: '45%', size: 'w-4 h-4' },
-    { type: 'icon', icon: 'brain', top: '55%', left: '25%', size: 'w-6 h-6' },
-    { type: 'icon', icon: 'brain', top: '25%', left: '15%', size: 'w-5 h-5' },
-    { type: 'icon', icon: 'brain', top: '35%', left: '85%', size: 'w-4 h-4' },
-
-    // Icons - Dollars
-    { type: 'icon', icon: 'dollar', top: '75%', left: '18%', size: 'w-5 h-5' },
-    { type: 'icon', icon: 'dollar', top: '12%', left: '88%', size: 'w-4 h-4' },
     { type: 'icon', icon: 'dollar', top: '40%', left: '35%', size: 'w-6 h-6' },
-    { type: 'icon', icon: 'dollar', top: '65%', left: '60%', size: 'w-5 h-5' },
-    { type: 'icon', icon: 'dollar', top: '5%', left: '25%', size: 'w-4 h-4' },
-
-    // Icons - Lightning
     { type: 'icon', icon: 'lightning', top: '42%', left: '12%', size: 'w-6 h-6' },
-    { type: 'icon', icon: 'lightning', top: '68%', left: '72%', size: 'w-5 h-5' },
-    { type: 'icon', icon: 'lightning', top: '22%', left: '65%', size: 'w-4 h-4' },
-    { type: 'icon', icon: 'lightning', top: '88%', left: '85%', size: 'w-6 h-6' },
-    { type: 'icon', icon: 'lightning', top: '15%', left: '5%', size: 'w-5 h-5' },
-
-    // Icons - Clouds
     { type: 'icon', icon: 'cloud', top: '55%', left: '80%', size: 'w-7 h-7' },
-    { type: 'icon', icon: 'cloud', top: '25%', left: '35%', size: 'w-5 h-5' },
-    { type: 'icon', icon: 'cloud', top: '8%', left: '75%', size: 'w-6 h-6' },
-    { type: 'icon', icon: 'cloud', top: '90%', left: '10%', size: 'w-5 h-5' },
-    { type: 'icon', icon: 'cloud', top: '35%', left: '55%', size: 'w-4 h-4' },
 
-    // Dense Rain Streaks
+    // Visual "rain streaks" to add depth and motion
     { type: 'streak', top: '5%', left: '30%', length: 'w-24' },
-    { type: 'streak', top: '8%', left: '45%', length: 'w-16' },
     { type: 'streak', top: '12%', left: '15%', length: 'w-32' },
-    { type: 'streak', top: '18%', left: '60%', length: 'w-20' },
-    { type: 'streak', top: '22%', left: '35%', length: 'w-40' },
-    { type: 'streak', top: '80%', left: '80%', length: 'w-28' },
-    { type: 'streak', top: '32%', left: '10%', length: 'w-36' },
-    { type: 'streak', top: '38%', left: '50%', length: 'w-24' },
     { type: 'streak', top: '42%', left: '25%', length: 'w-44' },
-    { type: 'streak', top: '48%', left: '75%', length: 'w-18' },
-    { type: 'streak', top: '52%', left: '40%', length: 'w-30' },
-    { type: 'streak', top: '58%', left: '15%', length: 'w-32' },
-    { type: 'streak', top: '62%', left: '85%', length: 'w-22' },
-    { type: 'streak', top: '68%', left: '30%', length: 'w-38' },
-    { type: 'streak', top: '72%', left: '55%', length: 'w-26' },
     { type: 'streak', top: '78%', left: '10%', length: 'w-42' },
-    { type: 'streak', top: '82%', left: '65%', length: 'w-20' },
-    { type: 'streak', top: '88%', left: '40%', length: 'w-36' },
-    { type: 'streak', top: '92%', left: '80%', length: 'w-24' },
-    { type: 'streak', top: '95%', left: '25%', length: 'w-28' },
-    { type: 'streak', top: '15%', left: '90%', length: 'w-12' },
-    { type: 'streak', top: '45%', left: '5%', length: 'w-48' },
-    { type: 'streak', top: '65%', left: '95%', length: 'w-14' },
-    { type: 'streak', top: '85%', left: '5%', length: 'w-30' },
   ];
 
+  // Helper to render relevant SVG icons
   const renderIcon = (name: string, className: string) => {
     switch (name) {
       case 'brain':
@@ -140,11 +109,11 @@ const VisualMockup: React.FC<{
 
   return (
     <div className="relative w-full max-w-6xl mx-auto min-h-[600px] flex items-center justify-center mt-12 mb-20 px-4">
-      {/* Main Generator Card */}
+      {/* Interactive Mockup Card Container */}
       <div className="relative w-full max-w-lg bg-white dark:bg-darkCard rounded-[48px] md:rounded-[56px] shadow-heavy p-8 md:p-12 border border-slate-100/50 dark:border-darkBorder z-10 transition-colors duration-300 overflow-hidden">
-         {/* Background Pattern Layer */}
          <BackgroundElements />
 
+         {/* Header Controls (Decorative for Mockup) */}
          <div className="relative z-10 flex items-center justify-between mb-8 md:mb-10">
             <div className="w-8 h-8 border border-slate-100 dark:border-slate-800 rounded-full flex items-center justify-center text-[10px] text-slate-300 dark:text-slate-600">✕</div>
             <div className="text-blue-600">
@@ -152,6 +121,7 @@ const VisualMockup: React.FC<{
             </div>
          </div>
 
+         {/* Central Logo Symbol */}
          <div className="relative z-10 flex justify-center mb-10">
             <div className="w-20 h-20 md:w-24 md:h-24 bg-gradient-to-tr from-blue-700 to-blue-500 rounded-[28px] md:rounded-[32px] flex items-center justify-center shadow-lg shadow-blue-500/20">
                <svg className="w-10 h-10 md:w-12 md:h-12 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -161,6 +131,7 @@ const VisualMockup: React.FC<{
             </div>
          </div>
 
+         {/* Interactive Input Mockup */}
          <div className="relative z-10 mt-10 flex flex-col gap-4">
             <div className="relative">
               <input 
@@ -173,6 +144,7 @@ const VisualMockup: React.FC<{
               <div className="absolute left-3 top-1/2 -translate-y-1/2 w-7 h-7 bg-slate-900 dark:bg-blue-600 text-white rounded-full flex items-center justify-center font-black text-lg">+</div>
             </div>
 
+            {/* Utility Toggles (Director and Voice Modes) */}
             <div className="grid grid-cols-2 gap-3">
                <div className="relative group/director-btn">
                  <button 
@@ -180,16 +152,15 @@ const VisualMockup: React.FC<{
                     className={`flex items-center justify-center gap-2 w-full h-14 rounded-3xl border-2 transition-all duration-300 font-black text-[9px] uppercase tracking-widest ${isDirectorMode ? 'bg-blue-600 border-blue-600 text-white shadow-lg' : 'bg-white/80 dark:bg-darkCard/80 border-slate-100 dark:border-darkBorder text-slate-400 dark:text-slate-500 backdrop-blur-sm'}`}
                  >
                     <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      {/* Gimbal arm structure */}
                       <path d="M12 18v3" />
                       <path d="M9 21h6" />
                       <path d="M12 13v2" />
                       <circle cx="12" cy="15" r="3" />
-                      {/* Camera body on gimbal */}
                       <rect x="8" y="5" width="8" height="6" rx="1" />
                       <path d="M16 8l3-1.5v3L16 8" />
                     </svg>
                     <span>Director Mode</span>
+                    {/* Feature Information Tooltip */}
                     <div className="relative group/info-trigger ml-1">
                       <div className="w-4 h-4 rounded-full border border-current flex items-center justify-center text-[8px] font-black cursor-help hover:bg-current hover:text-white transition-all">i</div>
                       <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-48 p-3 bg-slate-900 text-white text-[10px] font-bold rounded-2xl opacity-0 invisible group-hover/info-trigger:opacity-100 group-hover/info-trigger:visible transition-all duration-300 z-[100] shadow-2xl border border-white/10 text-center leading-relaxed">
@@ -211,6 +182,7 @@ const VisualMockup: React.FC<{
                </button>
             </div>
 
+            {/* Primary Strategy Button with customized loading animation */}
             <button 
                onClick={() => onGenerate(isDirectorMode)}
                disabled={isLoading}

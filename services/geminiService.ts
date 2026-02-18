@@ -1,7 +1,16 @@
+/**
+ * RAIN Ai Neural Engine Service
+ * Handles all communication with the Google Gemini API.
+ */
 
 import { GoogleGenAI, Type } from "@google/genai";
 import { LaunchSequence } from "../types";
 
+/**
+ * Exponential Backoff Retry Wrapper
+ * Specifically handles 429 (Rate Limit) errors from the API to ensure 
+ * high reliability during peak congestion.
+ */
 const withRetry = async <T>(fn: () => Promise<T>, retries = 5, delay = 3000): Promise<T> => {
   try {
     return await fn();
@@ -16,10 +25,11 @@ const withRetry = async <T>(fn: () => Promise<T>, retries = 5, delay = 3000): Pr
       errorStr = "";
     }
 
+    // Check for rate limit or quota exhaustion flags
     const isQuotaError = 
       errorStatus === 429 || 
       errorMessage.includes("quota") || 
-      errorMessage.includes("exhausted") ||
+      errorMessage.includes("exhausted") || 
       errorMessage.includes("rate limit") ||
       errorStr.includes("429") ||
       errorStr.includes("quota");
@@ -33,16 +43,22 @@ const withRetry = async <T>(fn: () => Promise<T>, retries = 5, delay = 3000): Pr
   }
 };
 
+/**
+ * Main Content Generation Function
+ * Synthesizes the 14-day sequence using Gemini-3-Pro-Preview.
+ */
 export const generateStorySequence = async (
   prompt: string, 
   imageBase64?: string, 
   directorMode: boolean = false,
   previousResult?: LaunchSequence
 ): Promise<LaunchSequence> => {
-  const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_API_KEY });
+  // Initialize the SDK with the environment API key
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   
   const contents: any[] = [{ text: prompt }];
   
+  // Handle optional image input for visual context
   if (imageBase64 && imageBase64.includes('base64,')) {
     contents.push({
       inlineData: {
@@ -52,6 +68,7 @@ export const generateStorySequence = async (
     });
   }
 
+  // Logic for refining existing sequences without losing original context
   let refinementInstruction = "";
   if (previousResult) {
     refinementInstruction = `
@@ -64,6 +81,7 @@ ONLY add the 'shotList' (3-4 cinematic technical directives) to each day to fulf
 Do not hallucinate changes to existing text if the core product/audience hasn't changed.`;
   }
 
+  // The primary personality and technical constraints for the AI
   const systemInstruction = `You are an elite Instagram Sales Strategist and Cinematographer. Your task is to generate or refine a premium 14-day Instagram Story sequence. 
 
 PHASES:
@@ -83,6 +101,7 @@ CRITICAL CONSTRAINTS:
 - Visual ideas: Aesthetic, high-end.
 - CTAs: MAX 5 words.`;
 
+  // Define the strict JSON schema to ensure predictable UI rendering
   const properties: any = {
     productName: { type: Type.STRING },
     audience: { type: Type.STRING },
@@ -103,6 +122,7 @@ CRITICAL CONSTRAINTS:
     },
   };
 
+  // Add director-specific fields if mode is enabled
   if (directorMode) {
     (properties.sequence.items.properties as any).shotList = {
       type: Type.ARRAY,
@@ -112,7 +132,7 @@ CRITICAL CONSTRAINTS:
   }
 
   return withRetry(async () => {
-    // Upgraded model to gemini-3-pro-preview for complex reasoning and cinematography directives
+    // Generate content with structured output
     const response = await ai.models.generateContent({
       model: "gemini-3-pro-preview",
       contents: { parts: contents },

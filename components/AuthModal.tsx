@@ -1,3 +1,9 @@
+/**
+ * AUTH MODAL
+ * Handles the entry gates of the application: Login, Signup, and Password Recovery.
+ * Uses local storage for user profile simulation.
+ */
+
 import React, { useState, useEffect } from 'react';
 
 interface AuthModalProps {
@@ -9,19 +15,20 @@ interface AuthModalProps {
 type AuthView = 'signup' | 'login' | 'forgot';
 
 const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess }) => {
-  const [view, setView] = useState<AuthView>('signup');
+  // Modal Internal State
+  const [view, setView] = useState<AuthView>('signup'); // Switch between sub-forms
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
-  const [animate, setAnimate] = useState(false);
+  const [animate, setAnimate] = useState(false); // Controls opening transitions
 
+  // Transition Orchestration
   useEffect(() => {
     if (isOpen) {
       setTimeout(() => setAnimate(true), 10);
-      // Pre-fill email only if we are in a non-signup view
       if (view !== 'signup') {
         const lastEmail = localStorage.getItem('rain_last_email');
         if (lastEmail) setEmail(lastEmail);
@@ -40,15 +47,14 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess }) => 
     }
   }, [isOpen]);
 
+  // View Switcher Handler
   const handleViewChange = (newView: AuthView) => {
     setView(newView);
     setError('');
     setSuccessMsg('');
     if (newView === 'signup') {
-      // Clear email when going to create account
       setEmail('');
     } else {
-      // Pre-fill if switching back to login/forgot
       const lastEmail = localStorage.getItem('rain_last_email');
       if (lastEmail) setEmail(lastEmail);
     }
@@ -56,6 +62,10 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess }) => 
 
   if (!isOpen) return null;
 
+  /**
+   * Main Form Submission Handler
+   * Implements custom security validation and local profile persistence.
+   */
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -64,6 +74,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess }) => 
     const users = JSON.parse(localStorage.getItem('rain_users') || '{}');
     const normalizedEmail = email.toLowerCase().trim();
 
+    // Signup Logic with explicit security requirements
     if (view === 'signup') {
       if (users[normalizedEmail]) {
         setError('This email is already associated with an account.');
@@ -74,18 +85,22 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess }) => 
         return;
       }
 
-      // Password requirement validation: at least 6 characters, 1 capital letter, 1 numerical and one special character
+      // Password Strength Validation Logic
+      // Requirement: 6+ chars, 1 Capital, 1 Number, 1 Special Char
       const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{6,}$/;
       if (!passwordRegex.test(password)) {
         setError('Password must be at least 6 characters, including 1 uppercase letter, 1 number, and 1 special character.');
         return;
       }
 
+      // Save user to simulated database
       users[normalizedEmail] = { password, name };
       localStorage.setItem('rain_users', JSON.stringify(users));
       localStorage.setItem('rain_last_email', normalizedEmail);
       onSuccess({ email: normalizedEmail, name });
-    } else if (view === 'login') {
+    } 
+    // Login Verification Logic
+    else if (view === 'login') {
       const user = users[normalizedEmail];
       if (user && user.password === password) {
         localStorage.setItem('rain_last_email', normalizedEmail);
@@ -93,7 +108,9 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess }) => 
       } else {
         setError('Invalid credentials. Please verify your email and password.');
       }
-    } else if (view === 'forgot') {
+    } 
+    // Recovery Logic simulation
+    else if (view === 'forgot') {
       if (users[normalizedEmail]) {
         console.log(`[RAIN Vault Recovery] Sending password "${users[normalizedEmail].password}" to ${normalizedEmail}`);
         setSuccessMsg(`Protocol recovery active. Your access key has been dispatched to ${normalizedEmail}.`);
@@ -109,16 +126,20 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess }) => 
 
   return (
     <div className={`fixed inset-0 z-[100] flex items-center justify-center p-4 transition-all duration-500 ${animate ? 'opacity-100' : 'opacity-0'}`}>
+      {/* Backdrop Trigger */}
       <div 
         className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
         onClick={onClose}
       />
       
+      {/* Modal Container */}
       <div className={`relative w-full max-w-md bg-white rounded-[44px] shadow-heavy p-10 border border-slate-100 overflow-hidden transition-all duration-500 ease-out transform ${animate ? 'scale-100 translate-y-0' : 'scale-90 translate-y-12'}`}>
+        {/* Aesthetic Background Accents */}
         <div className="absolute -top-24 -right-24 w-48 h-48 bg-blue-50 rounded-full blur-3xl opacity-60 animate-pulse"></div>
         <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-indigo-50 rounded-full blur-3xl opacity-60 animate-pulse" style={{ animationDelay: '1s' }}></div>
 
         <div className="relative z-10">
+          {/* Branded Icon Section */}
           <div className="flex justify-center mb-8">
             <div className="w-16 h-16 bg-gradient-to-tr from-blue-700 to-indigo-500 rounded-[20px] flex items-center justify-center animate-bounce-slow">
               <svg className="w-10 h-10 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -140,6 +161,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess }) => 
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Feedback Messages */}
             {error && (
               <div className="bg-red-50 border border-red-100 text-red-600 text-[10px] font-black uppercase tracking-widest p-4 rounded-2xl animate-shake">
                 {error}
@@ -152,6 +174,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess }) => 
               </div>
             )}
             
+            {/* Dynamic Form Fields based on View */}
             {view === 'signup' && (
               <div className="space-y-1 animate-fade-in-up">
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Full Name</label>
@@ -206,6 +229,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess }) => 
                     onClick={togglePasswordVisibility}
                     className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-slate-300 hover:text-blue-500 transition-colors rounded-xl"
                   >
+                    {/* Toggle SVG logic for visibility */}
                     {showPassword ? (
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M13.875 18.825A10.05 10.05 0 0112 19c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24" />
@@ -214,7 +238,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess }) => 
                     ) : (
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                       </svg>
                     )}
                   </button>
@@ -232,6 +256,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess }) => 
             </button>
           </form>
 
+          {/* Sub-navigation Links */}
           <div className="mt-8 text-center flex flex-col gap-3">
             <button 
               onClick={() => handleViewChange(view === 'signup' ? 'login' : 'signup')}

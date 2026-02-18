@@ -1,13 +1,20 @@
+/**
+ * NAVIGATION BAR
+ * Responsive floating header with branding and primary landing page actions.
+ */
+
 import React from 'react';
 
 interface NavbarProps {
-  onActionClick: () => void;
-  onSettingsClick?: () => void;
+  onActionClick: () => void;      // Logic to trigger auth or dashboard entry
+  onSettingsClick?: () => void;   // Logic to deep-link to settings
 }
 
 const Navbar: React.FC<NavbarProps> = ({ onActionClick, onSettingsClick }) => {
   return (
     <nav className="fixed top-6 left-1/2 -translate-x-1/2 w-[90%] max-w-6xl z-50 bg-white/60 dark:bg-darkCard/60 backdrop-blur-xl rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.05)] border border-white/40 dark:border-darkBorder/40 px-8 py-3 flex items-center justify-between transition-colors">
+      
+      {/* Brand Identity */}
       <div className="flex items-center gap-3">
         <div className="w-9 h-9 bg-gradient-to-tr from-blue-700 to-indigo-500 rounded-xl flex items-center justify-center">
           <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -18,7 +25,9 @@ const Navbar: React.FC<NavbarProps> = ({ onActionClick, onSettingsClick }) => {
         <span className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">RAIN <span className="text-blue-600 font-extrabold">Ai</span></span>
       </div>
       
+      {/* Primary Actions */}
       <div className="flex items-center gap-4">
+        {/* Settings Shortcut Button */}
         <button 
           onClick={onSettingsClick}
           className="p-2.5 rounded-xl text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white bg-white/50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-800 border border-slate-100 dark:border-darkBorder transition-all active:scale-90"
@@ -30,6 +39,7 @@ const Navbar: React.FC<NavbarProps> = ({ onActionClick, onSettingsClick }) => {
           </svg>
         </button>
         
+        {/* Main CTA: Entry into Dashboard */}
         <button 
           onClick={onActionClick}
           className="px-6 py-2.5 rounded-xl bg-slate-900 dark:bg-blue-600 text-white text-xs font-black uppercase tracking-widest hover:bg-blue-600 dark:hover:bg-blue-700 transition-all shadow-xl shadow-slate-200 dark:shadow-none active:scale-95"

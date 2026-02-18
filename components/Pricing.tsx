@@ -1,3 +1,9 @@
+/**
+ * PRICING COMPONENT
+ * Implements a high-conversion pricing section with a "forced-annual" nudge mechanism.
+ * Uses complex state transitions to prioritize high-value plans.
+ */
+
 import React, { useState, useRef, useEffect } from 'react';
 
 const PricingCard = ({ 
@@ -25,7 +31,7 @@ const PricingCard = ({
       } ${isHidden ? 'opacity-0 pointer-events-none scale-95 -translate-x-8 !w-0 !p-0 !m-0 overflow-hidden border-0' : 'opacity-100 p-10'} ${translateClass}`}
     >
       <div className={`w-full flex flex-col h-full ${isHidden ? 'invisible' : 'visible'}`}>
-        {/* Header Section with Fixed Height for Alignment */}
+        {/* Plan Identification Section */}
         <div className="h-[180px] mb-4">
           <p className={`text-[11px] font-black uppercase tracking-[0.3em] mb-4 ${isFeatured ? 'text-blue-400' : 'text-blue-600 dark:text-blue-400'}`}>
             {title}
@@ -39,7 +45,7 @@ const PricingCard = ({
           </p>
         </div>
 
-        {/* Feature List Section */}
+        {/* Feature Matrix for the specific plan */}
         <div className="flex-1 space-y-4 mb-8 pt-6 border-t border-slate-100 dark:border-slate-800">
           <p className={`text-[10px] font-black uppercase tracking-widest opacity-30 mb-2`}>Included Protocol</p>
           {features.map((feature: string, i: number) => (
@@ -52,7 +58,7 @@ const PricingCard = ({
           ))}
         </div>
 
-        {/* Button Section */}
+        {/* Action Button Section */}
         <div className="mt-auto">
           <button 
             onClick={onClick}
@@ -72,12 +78,12 @@ const PricingCard = ({
 const Pricing: React.FC = () => {
   const [hoveredIndex, setHoveredIndex] = useState(1);
   
-  // Logic states
-  const [isNudgeActive, setIsNudgeActive] = useState(false);
-  const [isAnnualCovering, setIsAnnualCovering] = useState(false);
-  const [isMonthlyHidden, setIsMonthlyHidden] = useState(false);
-  const [showGoodChoice, setShowGoodChoice] = useState(false);
-  const [isBypassActive, setIsBypassActive] = useState(false);
+  // Psychological Nudge State Logic
+  const [isNudgeActive, setIsNudgeActive] = useState(false);        // Show "Are you sure?" modal
+  const [isAnnualCovering, setIsAnnualCovering] = useState(false);  // Visual "covering" animation state
+  const [isMonthlyHidden, setIsMonthlyHidden] = useState(false);    // Temp hide monthly option
+  const [showGoodChoice, setShowGoodChoice] = useState(false);      // Success feedback bubble
+  const [isBypassActive, setIsBypassActive] = useState(false);      // Allows clicking monthly after nudge bypass
 
   const commonFeatures = [
     "14-Day Full Protocol Synthesis",
@@ -87,46 +93,44 @@ const Pricing: React.FC = () => {
     "Unlimited Archive Access"
   ];
 
+  /**
+   * Nudge Mechanism: Prevents users from easily selecting monthly.
+   * On first click, hides monthly and slides annual into its place.
+   */
   const handleMonthlyClick = () => {
-    // 1. If bypass is active, proceed normally
+    // If user already saw the nudge and said "Yes", allow the click
     if (isBypassActive) {
       alert("Proceeding to Monthly checkout...");
       return;
     }
 
-    // 2. Hide monthly and translate annual to cover it
+    // Otherwise, trigger the visual slide and confirmation modal
     setIsAnnualCovering(true);
-    
-    // 3. Show "Are you sure" modal after slide animation
     setTimeout(() => {
       setIsNudgeActive(true);
     }, 800);
   };
 
+  /**
+   * Handles user decision on the "Are you sure?" nudge.
+   */
   const handleDecision = (decision: 'yes' | 'no') => {
     if (decision === 'yes') {
-      // Yes path:
-      // 1) Annual pricing moves back
+      // User insisted on monthly
       setIsAnnualCovering(false);
       setIsNudgeActive(false);
-      // 2) user is able to click monthly pricing for 60 seconds
-      setIsBypassActive(true);
-      
-      // 3) after 60 seconds the original flow starts again
+      setIsBypassActive(true); // Enable bypass for 60 seconds
       setTimeout(() => {
         setIsBypassActive(false);
       }, 60000);
     } else {
-      // No path:
-      // 1) A new bubble pops up saying good choice
+      // User chose to reconsider (stay on annual/featured)
       setShowGoodChoice(true);
       setIsNudgeActive(false);
       setIsAnnualCovering(false);
-      // 2) monthly pricing hidden for 60s
-      setIsMonthlyHidden(true);
+      setIsMonthlyHidden(true); // Hide monthly for 60 seconds to lock in decision
       
       setTimeout(() => setShowGoodChoice(false), 3000);
-      
       setTimeout(() => {
         setIsMonthlyHidden(false);
       }, 60000);
@@ -144,7 +148,7 @@ const Pricing: React.FC = () => {
         </div>
 
         <div className="relative flex justify-center w-full">
-          {/* Confirmation Modal */}
+          {/* Forced-Annual Nudge Modal */}
           {isNudgeActive && (
             <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/10 backdrop-blur-md animate-fade-in">
               <div 
@@ -170,7 +174,7 @@ const Pricing: React.FC = () => {
             </div>
           )}
 
-          {/* Good Choice Bubble */}
+          {/* Psychological Reward Bubble */}
           {showGoodChoice && (
             <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[110] animate-bounce">
               <div className="bg-emerald-500 text-white px-12 py-6 rounded-full font-black text-sm uppercase tracking-[0.4em] shadow-heavy border-4 border-white/30">
@@ -179,11 +183,10 @@ const Pricing: React.FC = () => {
             </div>
           )}
 
-          {/* Pricing Grid with fixed width logic */}
-          <div 
-            className={`flex flex-col md:flex-row gap-8 items-center justify-center relative transition-all duration-700 w-full`}
-          >
-            {/* Monthly Card */}
+          {/* Interactive Pricing Grid */}
+          <div className={`flex flex-col md:flex-row gap-8 items-center justify-center relative transition-all duration-700 w-full`}>
+            
+            {/* Tier 1: Monthly (Vulnerable to nudge) */}
             <PricingCard 
               index={0}
               isHidden={isMonthlyHidden || isAnnualCovering}
@@ -197,7 +200,7 @@ const Pricing: React.FC = () => {
               buttonText="Initiate Monthly"
             />
             
-            {/* Annual Card (Middle) */}
+            {/* Tier 2: Annual (The primary goal of the nudge) */}
             <PricingCard 
               index={1}
               onHover={setHoveredIndex}
@@ -209,10 +212,10 @@ const Pricing: React.FC = () => {
               features={commonFeatures}
               buttonText="Secure Annual"
               isFeatured={true}
-              translateClass={isAnnualCovering ? "-translate-x-[412px]" : ""} // (380px width + 32px gap)
+              translateClass={isAnnualCovering ? "-translate-x-[412px]" : ""}
             />
             
-            {/* Enterprise Card */}
+            {/* Tier 3: Enterprise */}
             <PricingCard 
               index={2}
               onHover={setHoveredIndex}
@@ -228,6 +231,7 @@ const Pricing: React.FC = () => {
           </div>
         </div>
         
+        {/* Trust Indicators */}
         <div className="mt-24 text-center">
           <p className="text-[11px] font-black text-slate-300 dark:text-slate-700 uppercase tracking-[0.6em]">Secure Neural Checkout • AES-256 Encryption Active</p>
         </div>
