@@ -134,7 +134,7 @@ CRITICAL CONSTRAINTS:
   return withRetry(async () => {
     // Generate content with structured output
     const response = await ai.models.generateContent({
-      model: "gemini-3-pro-preview",
+      model: "gemini-3-flash-preview",
       contents: { parts: contents },
       config: {
         systemInstruction,
